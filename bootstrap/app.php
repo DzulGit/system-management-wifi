@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tipe-pengguna' => \App\Http\Middleware\PastikanTipePengguna::class,
             'pastikan.password' => \App\Http\Middleware\PastikanPasswordSudahDibuat::class,
+            'peran' => \App\Http\Middleware\PastikanPeranAdmin::class, 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
