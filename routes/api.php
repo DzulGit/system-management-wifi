@@ -2,8 +2,25 @@
 
 use App\Http\Controllers\Api\Auth\AuthAdminController;
 use App\Http\Controllers\Api\Auth\AuthPelangganController;
+use App\Http\Controllers\Api\Keuangan\TagihanController as KeuanganTagihanController;
+use App\Http\Controllers\Api\Operasional\LaporanKendalaController as OperasionalLaporanKendalaController;
+use App\Http\Controllers\Api\Operasional\PermohonanLayananController;
+use App\Http\Controllers\Api\Pelanggan\LaporanKendalaSayaController;
+use App\Http\Controllers\Api\Pelanggan\LayananSayaController;
+use App\Http\Controllers\Api\Pelanggan\ProfilController;
+use App\Http\Controllers\Api\Pelanggan\TagihanSayaController;
+use App\Http\Controllers\Api\Pendaftaran\PendaftaranController;
+use App\Http\Controllers\Api\SuperAdmin\AdminController;
+use App\Http\Controllers\Api\Teknisi\JadwalPemasanganController;
+use App\Http\Controllers\Api\Teknisi\JadwalSurveyController;
+use App\Http\Controllers\Api\Teknisi\LaporanKendalaController as TeknisiLaporanKendalaController;
 use Illuminate\Support\Facades\Route;
 
+// ===== PUBLIK (tanpa login) =====
+Route::post('pendaftaran', [PendaftaranController::class, 'store'])
+    ->middleware('throttle:pendaftaran');
+
+// ===== ADMIN =====
 Route::prefix('admin')->group(function () {
     Route::post('login', [AuthAdminController::class, 'login'])
         ->middleware('throttle:login');
@@ -11,11 +28,57 @@ Route::prefix('admin')->group(function () {
     Route::middleware(['auth:sanctum', 'tipe-pengguna:admin'])->group(function () {
         Route::post('logout', [AuthAdminController::class, 'logout']);
 
-        // Rute modul Operasional / Teknisi / Keuangan / Super Admin menyusul di sini,
-        // masing-masing akan ditambah middleware pengecekan `peran` (tahap Authorization).
+        // ----- Operasional -----
+        Route::middleware('peran:operasional,super_admin')->prefix('operasional')->group(function () {
+            Route::get('permohonan-layanan', [PermohonanLayananController::class, 'index']);
+            Route::get('permohonan-layanan/{permohonan}', [PermohonanLayananController::class, 'show']);
+            Route::post('permohonan-layanan', [PermohonanLayananController::class, 'store']);
+            Route::patch('permohonan-layanan/{permohonan}/verifikasi', [PermohonanLayananController::class, 'verifikasi']);
+            Route::post('permohonan-layanan/{permohonan}/jadwalkan-survey', [PermohonanLayananController::class, 'jadwalkanSurvey']);
+            Route::post('permohonan-layanan/{permohonan}/jadwalkan-pemasangan', [PermohonanLayananController::class, 'jadwalkanPemasangan']);
+
+            Route::get('laporan-kendala', [OperasionalLaporanKendalaController::class, 'index']);
+            Route::get('laporan-kendala/{laporanKendala}', [OperasionalLaporanKendalaController::class, 'show']);
+            Route::patch('laporan-kendala/{laporanKendala}/terima', [OperasionalLaporanKendalaController::class, 'terima']);
+            Route::patch('laporan-kendala/{laporanKendala}/teruskan-ke-teknisi', [OperasionalLaporanKendalaController::class, 'teruskanKeTeknisi']);
+            Route::patch('laporan-kendala/{laporanKendala}/tutup', [OperasionalLaporanKendalaController::class, 'tutup']);
+
+            // Rute CRUD Paket Internet menyusul.
+        });
+
+        // ----- Teknisi -----
+        Route::middleware('peran:teknisi,super_admin')->prefix('teknisi')->group(function () {
+            Route::get('jadwal-survey', [JadwalSurveyController::class, 'index']);
+            Route::get('jadwal-survey/{jadwalSurvey}', [JadwalSurveyController::class, 'show']);
+            Route::patch('jadwal-survey/{jadwalSurvey}/hasil', [JadwalSurveyController::class, 'isiHasil']);
+
+            Route::get('jadwal-pemasangan', [JadwalPemasanganController::class, 'index']);
+            Route::get('jadwal-pemasangan/{jadwalPemasangan}', [JadwalPemasanganController::class, 'show']);
+            Route::patch('jadwal-pemasangan/{jadwalPemasangan}/hasil', [JadwalPemasanganController::class, 'isiHasil']);
+
+            Route::get('laporan-kendala', [TeknisiLaporanKendalaController::class, 'index']);
+            Route::get('laporan-kendala/{laporanKendala}', [TeknisiLaporanKendalaController::class, 'show']);
+            Route::patch('laporan-kendala/{laporanKendala}/selesaikan', [TeknisiLaporanKendalaController::class, 'selesaikan']);
+        });
+
+        // ----- Keuangan -----
+        Route::middleware('peran:keuangan,super_admin')->prefix('keuangan')->group(function () {
+            Route::get('tagihan', [KeuanganTagihanController::class, 'index']);
+            Route::get('tagihan/{tagihan}', [KeuanganTagihanController::class, 'show']);
+        });
+
+        // ----- Super Admin -----
+        Route::middleware('peran:super_admin')->prefix('super-admin')->group(function () {
+            Route::get('admin', [AdminController::class, 'index']);
+            Route::get('admin/{admin}', [AdminController::class, 'show']);
+            Route::post('admin', [AdminController::class, 'store']);
+            Route::patch('admin/{admin}', [AdminController::class, 'update']);
+            Route::patch('admin/{admin}/nonaktifkan', [AdminController::class, 'nonaktifkan']);
+        });
     });
 });
 
+// ===== PELANGGAN =====
 Route::prefix('pelanggan')->group(function () {
     Route::post('login-pertama', [AuthPelangganController::class, 'loginPertama'])
         ->middleware('throttle:login-pertama');
@@ -29,8 +92,18 @@ Route::prefix('pelanggan')->group(function () {
         Route::middleware('pastikan.password')->group(function () {
             Route::post('logout', [AuthPelangganController::class, 'logout']);
 
-            // Rute dashboard pelanggan (profil, layanan, tagihan, laporan kendala)
-            // menyusul di sini.
+            Route::get('profil', [ProfilController::class, 'show']);
+            Route::patch('profil', [ProfilController::class, 'update']);
+
+            Route::get('layanan', [LayananSayaController::class, 'index']);
+            Route::get('layanan/{layanan}', [LayananSayaController::class, 'show']);
+
+            Route::get('tagihan', [TagihanSayaController::class, 'index']);
+            Route::get('tagihan/{tagihan}', [TagihanSayaController::class, 'show']);
+
+            Route::get('laporan-kendala', [LaporanKendalaSayaController::class, 'index']);
+            Route::get('laporan-kendala/{laporanKendala}', [LaporanKendalaSayaController::class, 'show']);
+            Route::post('laporan-kendala', [LaporanKendalaSayaController::class, 'store']);
         });
     });
 });
