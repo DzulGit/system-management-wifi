@@ -23,6 +23,16 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Contracts\LayananInternetRepositoryInterface::class,
             \App\Repositories\Eloquent\LayananInternetRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\Contracts\JadwalSurveyRepositoryInterface::class,
+            \App\Repositories\Eloquent\JadwalSurveyRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\Contracts\JadwalPemasanganRepositoryInterface::class,
+            \App\Repositories\Eloquent\JadwalPemasanganRepository::class
+        );
     }
 
     /**
@@ -36,6 +46,10 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('login-pertama', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip());
+        });
+
+        RateLimiter::for('pendaftaran', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip());
         });
     }
 }
