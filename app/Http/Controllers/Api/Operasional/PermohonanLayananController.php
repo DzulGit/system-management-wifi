@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Operasional;
 
 use App\Enums\JenisPermohonanEnum;
 use App\Enums\StatusPermohonanEnum;
+use App\Filters\PermohonanLayananFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PermohonanLayanan\JadwalkanPemasanganRequest;
 use App\Http\Requests\PermohonanLayanan\JadwalkanSurveyRequest;
@@ -11,39 +12,39 @@ use App\Http\Requests\PermohonanLayanan\TambahPermohonanRequest;
 use App\Http\Requests\PermohonanLayanan\VerifikasiPermohonanRequest;
 use App\Models\LayananInternet;
 use App\Models\PermohonanLayanan;
+use App\Repositories\Contracts\PermohonanLayananRepositoryInterface;
 use App\Services\JadwalPemasanganService;
 use App\Services\JadwalSurveyService;
 use App\Services\PermohonanLayananService;
-use Illuminate\Http\Request;
 
 class PermohonanLayananController extends Controller
 {
     public function __construct(
+        private readonly PermohonanLayananRepositoryInterface $permohonanLayananRepository,
         private readonly PermohonanLayananService $permohonanLayananService,
         private readonly JadwalSurveyService $jadwalSurveyService,
         private readonly JadwalPemasanganService $jadwalPemasanganService,
     ) {}
 
-    public function index(Request $request)
+    public function index(PermohonanLayananFilter $filter)
     {
         $this->authorize('viewAny', PermohonanLayanan::class);
 
-        $permohonan = PermohonanLayanan::query()
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->with('pelanggan')
-            ->latest()
-            ->paginate(20);
-
-        return response()->json(['data' => $permohonan]);
+        return response()->json([
+            'data' => $this->permohonanLayananRepository->paginate($filter),
+        ]);
     }
 
     public function show(PermohonanLayanan $permohonan)
     {
         $this->authorize('view', $permohonan);
 
-        return response()->json([
-            'data' => $permohonan->load(['pelanggan', 'paketInternet', 'riwayatStatus', 'jadwalSurvey', 'jadwalPemasangan']),
-        ]);
+        $permohonan = $this->permohonanLayananRepository->find(
+            $permohonan->id,
+            ['pelanggan', 'paketInternet', 'riwayatStatus', 'jadwalSurvey', 'jadwalPemasangan']
+        );
+
+        return response()->json(['data' => $permohonan]);
     }
 
     /**
@@ -91,7 +92,9 @@ class PermohonanLayananController extends Controller
         );
 
         if ($statusBaru === StatusPermohonanEnum::DITOLAK) {
-            $permohonan->update(['alasan_ditolak' => $data['catatan'] ?? null]);
+            $permohonan = $this->permohonanLayananRepository->update($permohonan, [
+                'alasan_ditolak' => $data['catatan'] ?? null,
+            ]);
         }
 
         return response()->json(['data' => $permohonan]);

@@ -6,31 +6,31 @@ use App\Enums\HasilPemasanganEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PermohonanLayanan\HasilPemasanganRequest;
 use App\Models\JadwalPemasangan;
+use App\Repositories\Contracts\JadwalPemasanganRepositoryInterface;
 use App\Services\JadwalPemasanganService;
 use Illuminate\Http\Request;
 
 class JadwalPemasanganController extends Controller
 {
     public function __construct(
+        private readonly JadwalPemasanganRepositoryInterface $jadwalPemasanganRepository,
         private readonly JadwalPemasanganService $jadwalPemasanganService,
     ) {}
 
     public function index(Request $request)
     {
-        $jadwal = JadwalPemasangan::where('admin_id', $request->user()->id)
-            ->whereNull('hasil')
-            ->with('permohonanLayanan.pelanggan')
-            ->orderBy('tanggal_pemasangan')
-            ->paginate(20);
-
-        return response()->json(['data' => $jadwal]);
+        return response()->json([
+            'data' => $this->jadwalPemasanganRepository->paginateMilikTeknisiBelumSelesai($request->user()->id),
+        ]);
     }
 
     public function show(Request $request, JadwalPemasangan $jadwalPemasangan)
     {
         abort_unless($jadwalPemasangan->admin_id === $request->user()->id, 403);
 
-        return response()->json(['data' => $jadwalPemasangan->load('permohonanLayanan.pelanggan')]);
+        $jadwal = $this->jadwalPemasanganRepository->find($jadwalPemasangan->id, ['permohonanLayanan.pelanggan']);
+
+        return response()->json(['data' => $jadwal]);
     }
 
     /**
