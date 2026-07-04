@@ -25,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
+            \App\Repositories\Contracts\TagihanRepositoryInterface::class,
+            \App\Repositories\Eloquent\TagihanRepository::class
+        );
+
+        $this->app->bind(
             \App\Repositories\Contracts\JadwalSurveyRepositoryInterface::class,
             \App\Repositories\Eloquent\JadwalSurveyRepository::class
         );
@@ -37,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             \App\Repositories\Contracts\AdminRepositoryInterface::class,
             \App\Repositories\Eloquent\AdminRepository::class
+        );
+
+        $this->app->bind(
+            \App\Repositories\Contracts\LaporanKendalaRepositoryInterface::class,
+            \App\Repositories\Eloquent\LaporanKendalaRepository::class
         );
     }
 
