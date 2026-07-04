@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\LayananInternet;
 use App\Repositories\Contracts\LayananInternetRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class LayananInternetRepository implements LayananInternetRepositoryInterface
 {
@@ -19,8 +20,16 @@ class LayananInternetRepository implements LayananInternetRepositoryInterface
         return $layanan->fresh();
     }
 
-    public function find(int $id): ?LayananInternet
+    public function find(int $id, array $with = []): ?LayananInternet
     {
-        return LayananInternet::find($id);
+        return LayananInternet::with($with)->find($id);
+    }
+
+    public function paginateUntukPelanggan(int $pelangganId, int $perPage = 20): LengthAwarePaginator
+    {
+        return LayananInternet::where('pelanggan_id', $pelangganId)
+            ->with('paketInternet')
+            ->latest()
+            ->paginate($perPage);
     }
 }

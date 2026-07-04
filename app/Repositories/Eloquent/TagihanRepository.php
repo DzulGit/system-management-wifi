@@ -2,8 +2,10 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Filters\TagihanFilter;
 use App\Models\Tagihan;
 use App\Repositories\Contracts\TagihanRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class TagihanRepository implements TagihanRepositoryInterface
 {
@@ -12,8 +14,24 @@ class TagihanRepository implements TagihanRepositoryInterface
         return Tagihan::create($data);
     }
 
-    public function find(int $id): ?Tagihan
+    public function find(int $id, array $with = []): ?Tagihan
     {
-        return Tagihan::find($id);
+        return Tagihan::with($with)->find($id);
+    }
+
+    public function paginateSemua(TagihanFilter $filter, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = Tagihan::query()->with('layananInternet.pelanggan')->latest();
+
+        return $filter->apply($query)->paginate($perPage);
+    }
+
+    public function paginateUntukPelanggan(int $pelangganId, TagihanFilter $filter, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = Tagihan::query()
+            ->whereHas('layananInternet', fn ($q) => $q->where('pelanggan_id', $pelangganId))
+            ->latest();
+
+        return $filter->apply($query)->paginate($perPage);
     }
 }

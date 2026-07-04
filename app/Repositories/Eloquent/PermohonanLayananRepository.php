@@ -2,8 +2,10 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Filters\PermohonanLayananFilter;
 use App\Models\PermohonanLayanan;
 use App\Repositories\Contracts\PermohonanLayananRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class PermohonanLayananRepository implements PermohonanLayananRepositoryInterface
 {
@@ -19,8 +21,15 @@ class PermohonanLayananRepository implements PermohonanLayananRepositoryInterfac
         return $permohonan->fresh();
     }
 
-    public function find(int $id): ?PermohonanLayanan
+    public function find(int $id, array $with = []): ?PermohonanLayanan
     {
-        return PermohonanLayanan::find($id);
+        return PermohonanLayanan::with($with)->find($id);
+    }
+
+    public function paginate(PermohonanLayananFilter $filter, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = PermohonanLayanan::query()->with('pelanggan')->latest();
+
+        return $filter->apply($query)->paginate($perPage);
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Filters\LaporanKendalaFilter;
 use App\Models\LaporanKendala;
 use App\Repositories\Contracts\LaporanKendalaRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class LaporanKendalaRepository implements LaporanKendalaRepositoryInterface
 {
@@ -19,8 +21,34 @@ class LaporanKendalaRepository implements LaporanKendalaRepositoryInterface
         return $laporan->fresh();
     }
 
-    public function find(int $id): ?LaporanKendala
+    public function find(int $id, array $with = []): ?LaporanKendala
     {
-        return LaporanKendala::find($id);
+        return LaporanKendala::with($with)->find($id);
+    }
+
+    public function paginateSemua(LaporanKendalaFilter $filter, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = LaporanKendala::query()->with('layananInternet.pelanggan')->latest();
+
+        return $filter->apply($query)->paginate($perPage);
+    }
+
+    public function paginateUntukPelanggan(int $pelangganId, LaporanKendalaFilter $filter, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = LaporanKendala::query()
+            ->whereHas('layananInternet', fn ($q) => $q->where('pelanggan_id', $pelangganId))
+            ->latest();
+
+        return $filter->apply($query)->paginate($perPage);
+    }
+
+    public function paginateUntukTeknisi(int $teknisiId, LaporanKendalaFilter $filter, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = LaporanKendala::query()
+            ->where('ditugaskan_ke', $teknisiId)
+            ->with('layananInternet.pelanggan')
+            ->latest();
+
+        return $filter->apply($query)->paginate($perPage);
     }
 }
