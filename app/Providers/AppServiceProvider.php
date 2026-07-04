@@ -33,6 +33,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Contracts\JadwalPemasanganRepositoryInterface::class,
             \App\Repositories\Eloquent\JadwalPemasanganRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\Contracts\AdminRepositoryInterface::class,
+            \App\Repositories\Eloquent\AdminRepository::class
+        );
     }
 
     /**
