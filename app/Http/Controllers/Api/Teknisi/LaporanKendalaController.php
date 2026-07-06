@@ -26,7 +26,7 @@ class LaporanKendalaController extends Controller
 
     public function show(Request $request, LaporanKendala $laporanKendala)
     {
-        abort_unless($laporanKendala->ditugaskan_ke === $request->user()->id, 403);
+        abort_unless((int) $laporanKendala->ditugaskan_ke === (int) $request->user()->id, 403);
 
         $laporan = $this->laporanKendalaRepository->find($laporanKendala->id, ['layananInternet.pelanggan']);
 
@@ -36,7 +36,7 @@ class LaporanKendalaController extends Controller
     public function selesaikan(SelesaikanLaporanRequest $request, LaporanKendala $laporanKendala)
     {
         $this->authorize('selesaikan', $laporanKendala);
-        abort_unless($laporanKendala->ditugaskan_ke === $request->user()->id, 403);
+        abort_unless((int) $laporanKendala->ditugaskan_ke === (int) $request->user()->id, 403);
 
         $laporan = $this->laporanKendalaService->selesaikan(
             $laporanKendala,

@@ -26,7 +26,7 @@ class JadwalSurveyController extends Controller
 
     public function show(Request $request, JadwalSurvey $jadwalSurvey)
     {
-        abort_unless($jadwalSurvey->admin_id === $request->user()->id, 403);
+        abort_unless((int) $jadwalSurvey->admin_id === (int) $request->user()->id, 403);
 
         $jadwal = $this->jadwalSurveyRepository->find($jadwalSurvey->id, ['permohonanLayanan.pelanggan']);
 
@@ -36,7 +36,7 @@ class JadwalSurveyController extends Controller
     public function isiHasil(HasilSurveyRequest $request, JadwalSurvey $jadwalSurvey)
     {
         // Teknisi hanya boleh isi hasil jadwal miliknya sendiri
-        abort_unless($jadwalSurvey->admin_id === $request->user()->id, 403);
+        abort_unless((int) $jadwalSurvey->admin_id === (int) $request->user()->id, 403);
 
         $data = $request->validated();
 

@@ -26,7 +26,7 @@ class JadwalPemasanganController extends Controller
 
     public function show(Request $request, JadwalPemasangan $jadwalPemasangan)
     {
-        abort_unless($jadwalPemasangan->admin_id === $request->user()->id, 403);
+        abort_unless((int) $jadwalPemasangan->admin_id === (int) $request->user()->id, 403);
 
         $jadwal = $this->jadwalPemasanganRepository->find($jadwalPemasangan->id, ['permohonanLayanan.pelanggan']);
 
@@ -39,7 +39,7 @@ class JadwalPemasanganController extends Controller
      */
     public function isiHasil(HasilPemasanganRequest $request, JadwalPemasangan $jadwalPemasangan)
     {
-        abort_unless($jadwalPemasangan->admin_id === $request->user()->id, 403);
+        abort_unless((int) $jadwalPemasangan->admin_id === (int) $request->user()->id, 403);
 
         $data = $request->validated();
 
