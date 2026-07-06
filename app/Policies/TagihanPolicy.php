@@ -24,7 +24,7 @@ class TagihanPolicy
             return in_array($user->peran, [PeranAdminEnum::KEUANGAN, PeranAdminEnum::SUPER_ADMIN], true);
         }
 
-        return $tagihan->layananInternet->pelanggan_id === $user->id;
+        return (int) $tagihan->layananInternet->pelanggan_id === (int) $user->id;
     }
 
     public function create(Admin $admin): bool

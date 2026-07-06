@@ -21,7 +21,7 @@ class PermohonanLayananPolicy
             return true; // semua peran admin boleh melihat detail
         }
 
-        return $permohonan->pelanggan_id === $user->id;
+        return (int) $permohonan->pelanggan_id === (int) $user->id;
     }
 
     public function create(Admin|Pelanggan $user): bool

@@ -20,7 +20,7 @@ class LayananInternetPolicy
             return true;
         }
 
-        return $layanan->pelanggan_id === $user->id;
+        return (int) $layanan->pelanggan_id === (int) $user->id;
     }
 
     /**

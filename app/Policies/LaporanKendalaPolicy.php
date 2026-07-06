@@ -28,7 +28,7 @@ class LaporanKendalaPolicy
             return $this->viewAny($user);
         }
 
-        return $laporan->layananInternet->pelanggan_id === $user->id;
+        return (int) $laporan->layananInternet->pelanggan_id === (int) $user->id;
     }
 
     public function create(Admin|Pelanggan $user): bool
