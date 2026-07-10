@@ -43,6 +43,7 @@ Route::prefix('admin')->group(function () {
             Route::patch('laporan-kendala/{laporanKendala}/teruskan-ke-teknisi', [OperasionalLaporanKendalaController::class, 'teruskanKeTeknisi']);
             Route::patch('laporan-kendala/{laporanKendala}/tutup', [OperasionalLaporanKendalaController::class, 'tutup']);
 
+            Route::get('teknisi', [PermohonanLayananController::class, 'daftarTeknisi']);
             // Rute CRUD Paket Internet menyusul.
         });
 

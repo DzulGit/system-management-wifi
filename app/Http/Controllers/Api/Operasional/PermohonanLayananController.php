@@ -134,4 +134,15 @@ class PermohonanLayananController extends Controller
 
         return response()->json(['data' => $jadwal], 201);
     }
+
+    public function daftarTeknisi()
+    {
+        $teknisi = \App\Models\Admin::where('peran', \App\Enums\PeranAdminEnum::TEKNISI)
+            ->where('status_aktif', true)
+            ->select('id', 'nama_lengkap')
+            ->orderBy('nama_lengkap')
+            ->get();
+
+        return response()->json(['data' => $teknisi]);
+    }
 }
