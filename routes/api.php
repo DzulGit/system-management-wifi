@@ -64,6 +64,7 @@ Route::prefix('admin')->group(function () {
 
         // ----- Keuangan -----
         Route::middleware('peran:keuangan,super_admin')->prefix('keuangan')->group(function () {
+            Route::get('tagihan-ringkasan', [KeuanganTagihanController::class, 'ringkasanOmzet']);
             Route::get('tagihan', [KeuanganTagihanController::class, 'index']);
             Route::get('tagihan/{tagihan}', [KeuanganTagihanController::class, 'show']);
         });
