@@ -15,10 +15,12 @@ use App\Http\Controllers\Api\Teknisi\JadwalPemasanganController;
 use App\Http\Controllers\Api\Teknisi\JadwalSurveyController;
 use App\Http\Controllers\Api\Teknisi\LaporanKendalaController as TeknisiLaporanKendalaController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Publik\PaketInternetController;
 
 // ===== PUBLIK (tanpa login) =====
 Route::post('pendaftaran', [PendaftaranController::class, 'store'])
     ->middleware('throttle:pendaftaran');
+Route::get('paket-internet', [PaketInternetController::class, 'index']);
 
 // ===== ADMIN =====
 Route::prefix('admin')->group(function () {
