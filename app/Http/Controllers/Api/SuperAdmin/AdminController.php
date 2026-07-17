@@ -28,10 +28,11 @@ class AdminController extends Controller
         return response()->json(['data' => $admin]);
     }
 
-    public function store(SimpanAdminRequest $request, Request $httpRequest)
+    public function store(SimpanAdminRequest $request)
     {
         $data = $request->validated();
-        $data['dibuat_oleh'] = $httpRequest->user()->id;
+
+        $data['dibuat_oleh'] = $request->user()->id;
 
         $admin = $this->adminRepository->create($data);
 
