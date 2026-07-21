@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Http\Controllers\Api\Teknisi;
+
+use App\Enums\HasilKerjaEnum;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\PermohonanLayanan\HasilKerjaRequest;
+use App\Models\JadwalKerja;
+use App\Repositories\Contracts\JadwalKerjaRepositoryInterface;
+use App\Services\JadwalKerjaService;
+use Illuminate\Http\Request;
+
+class JadwalKerjaController extends Controller
+{
+    public function __construct(
+        private readonly JadwalKerjaRepositoryInterface $jadwalKerjaRepository,
+        private readonly JadwalKerjaService $jadwalKerjaService,
+    ) {}
+
+    public function index(Request $request)
+    {
+        return response()->json([
+            'data' => $this->jadwalKerjaRepository->paginateMilikTeknisiBelumSelesai($request->user()->id),
+        ]);
+    }
+
+    public function show(Request $request, JadwalKerja $jadwalKerja)
+    {
+        $this->authorize('view', $jadwalKerja);
+
+        $jadwal = $this->jadwalKerjaRepository->find(
+            $jadwalKerja->id,
+            ['permohonanLayanan.pelanggan', 'teknisi', 'timTeknisi']
+        );
+
+        return response()->json(['data' => $jadwal]);
+    }
+
+    /** Response menyertakan `ringkasan_aktivasi` (username dkk) kalau hasil = selesai. */
+    public function isiHasil(HasilKerjaRequest $request, JadwalKerja $jadwalKerja)
+    {
+        $this->authorize('isiHasil', $jadwalKerja);
+
+        $data = $request->validated();
+
+        $hasil = $this->jadwalKerjaService->isiHasil(
+            $jadwalKerja,
+            HasilKerjaEnum::from($data['hasil']),
+            $data['catatan_kendala'] ?? null,
+            $request->user(),
+        );
+
+        return response()->json(['data' => $hasil]);
+    }
+}
