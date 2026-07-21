@@ -1,52 +1,34 @@
 <?php
 
-namespace App\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use App\Enums\HasilKerjaEnum;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
-class JadwalKerja extends Model
+return new class extends Migration
 {
-    use HasFactory;
-
-    protected $table = 'jadwal_kerja';
-
-    protected $fillable = [
-        'permohonan_layanan_id',
-        'tim_teknisi_id',
-        'tanggal_kerja',
-        'hasil',
-        'catatan_kendala',
-        'diisi_oleh',
-    ];
-
-    protected $casts = [
-        'hasil' => HasilKerjaEnum::class,
-        'tanggal_kerja' => 'date',
-    ];
-
-    public function permohonanLayanan(): BelongsTo
+    public function up(): void
     {
-        return $this->belongsTo(PermohonanLayanan::class, 'permohonan_layanan_id');
+        Schema::create('tim_teknisi', function (Blueprint $table) {
+            $table->id();
+            $table->string('nama_tim');
+            $table->boolean('status_aktif')->default(true);
+            $table->timestamps();
+        });
+
+        Schema::create('tim_teknisi_anggota', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('tim_teknisi_id')->constrained('tim_teknisi')->cascadeOnDelete();
+            // Harus admin dengan peran teknisi — divalidasi di level Request, bukan FK constraint
+            $table->foreignId('admin_id')->constrained('admin')->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['tim_teknisi_id', 'admin_id']);
+        });
     }
 
-    public function timTeknisi(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(TimTeknisi::class, 'tim_teknisi_id');
+        Schema::dropIfExists('tim_teknisi_anggota');
+        Schema::dropIfExists('tim_teknisi');
     }
-
-    public function diisiOleh(): BelongsTo
-    {
-        return $this->belongsTo(Admin::class, 'diisi_oleh');
-    }
-
-    /** Sumber kebenaran siapa yang benar-benar bisa akses pekerjaan ini. */
-    public function teknisi(): BelongsToMany
-    {
-        return $this->belongsToMany(Admin::class, 'jadwal_kerja_teknisi', 'jadwal_kerja_id', 'admin_id')
-            ->withTimestamps();
-    }
-}
+};
