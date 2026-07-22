@@ -9,14 +9,14 @@ enum StatusPermohonanEnum: string
     case DITERIMA = 'DITERIMA';
     case DITOLAK = 'DITOLAK';
     case DIJADWALKAN = 'DIJADWALKAN';
-    case SURVEY = 'SURVEY';
-    case PEMASANGAN = 'PEMASANGAN';
     case DITUNDA = 'DITUNDA';
     case DIKONVERSI = 'DIKONVERSI';
 
     /**
-     * Peta transisi status yang valid (state machine).
-     * Dipakai oleh PermohonanLayananService untuk validasi sebelum ubah status.
+     * State machine DISEDERHANAKAN (revisi Juli 2026) — survey & pemasangan
+     * digabung jadi satu tahap kunjungan teknisi. DITUNDA sekarang berarti
+     * "ada kendala di kunjungan sebelumnya, menunggu Operasional jadwalkan
+     * ulang", lalu balik lagi ke DIJADWALKAN — bukan lompat ke tahap lain.
      */
     public function transisiValid(): array
     {
@@ -24,11 +24,9 @@ enum StatusPermohonanEnum: string
             self::MENUNGGU_VERIFIKASI => [self::PERLU_REVISI, self::DITERIMA, self::DITOLAK],
             self::PERLU_REVISI => [self::MENUNGGU_VERIFIKASI],
             self::DITERIMA => [self::DIJADWALKAN],
-            self::DIJADWALKAN => [self::SURVEY],
-            self::SURVEY => [self::DITUNDA, self::PEMASANGAN],
-            self::PEMASANGAN => [self::DITUNDA, self::DIKONVERSI],
-            self::DITUNDA => [self::SURVEY, self::PEMASANGAN], // kembali sesuai tahap sebelumnya
-            self::DITOLAK, self::DIKONVERSI => [], // status akhir
+            self::DIJADWALKAN => [self::DITUNDA, self::DIKONVERSI],
+            self::DITUNDA => [self::DIJADWALKAN],
+            self::DITOLAK, self::DIKONVERSI => [],
         };
     }
 
