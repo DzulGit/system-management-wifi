@@ -30,14 +30,13 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
-            \App\Repositories\Contracts\JadwalSurveyRepositoryInterface::class,
-            \App\Repositories\Eloquent\JadwalSurveyRepository::class
+            \App\Repositories\Contracts\JadwalKerjaRepositoryInterface::class,
+            \App\Repositories\Eloquent\JadwalKerjaRepository::class
         );
-
         $this->app->bind(
-            \App\Repositories\Contracts\JadwalPemasanganRepositoryInterface::class,
-            \App\Repositories\Eloquent\JadwalPemasanganRepository::class
-        );
+            \App\Repositories\Contracts\TimTeknisiRepositoryInterface::class,
+            \App\Repositories\Eloquent\TimTeknisiRepository::class
+        );;
 
         $this->app->bind(
             \App\Repositories\Contracts\AdminRepositoryInterface::class,

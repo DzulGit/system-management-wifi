@@ -13,8 +13,7 @@ use App\Http\Requests\PermohonanLayanan\VerifikasiPermohonanRequest;
 use App\Models\LayananInternet;
 use App\Models\PermohonanLayanan;
 use App\Repositories\Contracts\PermohonanLayananRepositoryInterface;
-use App\Services\JadwalPemasanganService;
-use App\Services\JadwalSurveyService;
+use App\Services\JadwalKerjaService;
 use App\Services\PermohonanLayananService;
 
 class PermohonanLayananController extends Controller
@@ -22,8 +21,7 @@ class PermohonanLayananController extends Controller
     public function __construct(
         private readonly PermohonanLayananRepositoryInterface $permohonanLayananRepository,
         private readonly PermohonanLayananService $permohonanLayananService,
-        private readonly JadwalSurveyService $jadwalSurveyService,
-        private readonly JadwalPemasanganService $jadwalPemasanganService,
+        private readonly JadwalKerjaService $jadwalKerjaService,
     ) {}
 
     public function index(PermohonanLayananFilter $filter)
@@ -101,35 +99,20 @@ class PermohonanLayananController extends Controller
     }
 
     /**
-     * Jadwalkan survey — dipakai untuk penjadwalan awal maupun re-jadwal setelah DITUNDA.
+     * Jadwalkan kunjungan teknisi — dipakai untuk penjadwalan awal (dari
+     * DITERIMA) MAUPUN reschedule setelah DITUNDA. Cuma ada SATU endpoint
+     * penjadwalan sekarang, gabungan survey+pemasangan.
      */
-    public function jadwalkanSurvey(JadwalkanSurveyRequest $request, PermohonanLayanan $permohonan)
+    public function jadwalkanKerja(JadwalkanKerjaRequest $request, PermohonanLayanan $permohonan)
     {
         $this->authorize('ubahStatus', $permohonan);
 
-        $jadwal = $this->jadwalSurveyService->jadwalkan(
+        $jadwal = $this->jadwalKerjaService->jadwalkan(
             $permohonan,
-            $request->validated('admin_id'),
-            $request->validated('tanggal_survey'),
+            $request->validated('teknisi_ids'),
+            $request->validated('tanggal_kerja'),
             $request->user(),
-        );
-
-        return response()->json(['data' => $jadwal], 201);
-    }
-
-    /**
-     * Jadwalkan pemasangan — hanya valid setelah status PEMASANGAN (survey berhasil)
-     * atau saat resume dari DITUNDA di tahap pemasangan.
-     */
-    public function jadwalkanPemasangan(JadwalkanPemasanganRequest $request, PermohonanLayanan $permohonan)
-    {
-        $this->authorize('ubahStatus', $permohonan);
-
-        $jadwal = $this->jadwalPemasanganService->jadwalkan(
-            $permohonan,
-            $request->validated('admin_id'),
-            $request->validated('tanggal_pemasangan'),
-            $request->user(),
+            $request->validated('tim_teknisi_id'),
         );
 
         return response()->json(['data' => $jadwal], 201);

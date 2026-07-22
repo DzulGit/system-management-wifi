@@ -11,8 +11,8 @@ use App\Http\Controllers\Api\Pelanggan\ProfilController;
 use App\Http\Controllers\Api\Pelanggan\TagihanSayaController;
 use App\Http\Controllers\Api\Pendaftaran\PendaftaranController;
 use App\Http\Controllers\Api\SuperAdmin\AdminController;
-use App\Http\Controllers\Api\Teknisi\JadwalPemasanganController;
-use App\Http\Controllers\Api\Teknisi\JadwalSurveyController;
+use App\Http\Controllers\Api\Teknisi\JadwalKerjaController;
+use App\Http\Controllers\Api\SuperAdmin\TimTeknisiController;
 use App\Http\Controllers\Api\Teknisi\LaporanKendalaController as TeknisiLaporanKendalaController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Publik\PaketInternetController;
@@ -36,8 +36,7 @@ Route::prefix('admin')->group(function () {
             Route::get('permohonan-layanan/{permohonan}', [PermohonanLayananController::class, 'show']);
             Route::post('permohonan-layanan', [PermohonanLayananController::class, 'store']);
             Route::patch('permohonan-layanan/{permohonan}/verifikasi', [PermohonanLayananController::class, 'verifikasi']);
-            Route::post('permohonan-layanan/{permohonan}/jadwalkan-survey', [PermohonanLayananController::class, 'jadwalkanSurvey']);
-            Route::post('permohonan-layanan/{permohonan}/jadwalkan-pemasangan', [PermohonanLayananController::class, 'jadwalkanPemasangan']);
+            Route::post('permohonan-layanan/{permohonan}/jadwalkan-kerja', [PermohonanLayananController::class, 'jadwalkanKerja']);
 
             Route::get('laporan-kendala', [OperasionalLaporanKendalaController::class, 'index']);
             Route::get('laporan-kendala/{laporanKendala}', [OperasionalLaporanKendalaController::class, 'show']);
@@ -45,19 +44,17 @@ Route::prefix('admin')->group(function () {
             Route::patch('laporan-kendala/{laporanKendala}/teruskan-ke-teknisi', [OperasionalLaporanKendalaController::class, 'teruskanKeTeknisi']);
             Route::patch('laporan-kendala/{laporanKendala}/tutup', [OperasionalLaporanKendalaController::class, 'tutup']);
 
+            Route::get('tim-teknisi', [TimTeknisiController::class, 'listAktif']);
+
             Route::get('teknisi', [PermohonanLayananController::class, 'daftarTeknisi']);
             // Rute CRUD Paket Internet menyusul.
         });
 
         // ----- Teknisi -----
         Route::middleware('peran:teknisi,super_admin')->prefix('teknisi')->group(function () {
-            Route::get('jadwal-survey', [JadwalSurveyController::class, 'index']);
-            Route::get('jadwal-survey/{jadwalSurvey}', [JadwalSurveyController::class, 'show']);
-            Route::patch('jadwal-survey/{jadwalSurvey}/hasil', [JadwalSurveyController::class, 'isiHasil']);
-
-            Route::get('jadwal-pemasangan', [JadwalPemasanganController::class, 'index']);
-            Route::get('jadwal-pemasangan/{jadwalPemasangan}', [JadwalPemasanganController::class, 'show']);
-            Route::patch('jadwal-pemasangan/{jadwalPemasangan}/hasil', [JadwalPemasanganController::class, 'isiHasil']);
+            Route::get('jadwal-kerja', [JadwalKerjaController::class, 'index']);
+            Route::get('jadwal-kerja/{jadwalKerja}', [JadwalKerjaController::class, 'show']);
+            Route::patch('jadwal-kerja/{jadwalKerja}/hasil', [JadwalKerjaController::class, 'isiHasil']);
 
             Route::get('laporan-kendala', [TeknisiLaporanKendalaController::class, 'index']);
             Route::get('laporan-kendala/{laporanKendala}', [TeknisiLaporanKendalaController::class, 'show']);
@@ -78,6 +75,11 @@ Route::prefix('admin')->group(function () {
             Route::post('admin', [AdminController::class, 'store']);
             Route::patch('admin/{admin}', [AdminController::class, 'update']);
             Route::patch('admin/{admin}/nonaktifkan', [AdminController::class, 'nonaktifkan']);
+
+            Route::get('tim-teknisi', [TimTeknisiController::class, 'index']);
+            Route::get('tim-teknisi/{timTeknisi}', [TimTeknisiController::class, 'show']);
+            Route::post('tim-teknisi', [TimTeknisiController::class, 'store']);
+            Route::patch('tim-teknisi/{timTeknisi}', [TimTeknisiController::class, 'update']);
         });
     });
 });

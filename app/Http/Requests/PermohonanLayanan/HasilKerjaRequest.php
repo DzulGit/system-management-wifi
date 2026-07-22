@@ -4,7 +4,7 @@ namespace App\Http\Requests\PermohonanLayanan;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class HasilSurveyRequest extends FormRequest
+class HasilKerjaRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -14,8 +14,8 @@ class HasilSurveyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'hasil' => ['required', 'in:berhasil,kendala'],
-            'catatan' => ['required_if:hasil,kendala', 'nullable', 'string'],
+            'hasil' => ['required', 'in:selesai,kendala'],
+            'catatan_kendala' => ['required_if:hasil,kendala', 'nullable', 'string'],
         ];
     }
 }
