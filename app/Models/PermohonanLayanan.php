@@ -76,14 +76,10 @@ class PermohonanLayanan extends Model
         return $this->hasOne(LayananInternet::class, 'permohonan_layanan_id');
     }
 
-    public function jadwalSurvey(): HasMany
+    public function jadwalKerja(): HasMany
     {
-        return $this->hasMany(JadwalSurvey::class, 'permohonan_layanan_id');
-    }
-
-    public function jadwalPemasangan(): HasMany
-    {
-        return $this->hasMany(JadwalPemasangan::class, 'permohonan_layanan_id');
+        // Sesuaikan JadwalKerja::class dengan nama Model lu yang bener
+        return $this->hasMany(JadwalKerja::class, 'permohonan_layanan_id');
     }
 
     public function riwayatStatus(): HasMany

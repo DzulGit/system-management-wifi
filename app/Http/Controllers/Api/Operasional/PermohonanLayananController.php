@@ -6,10 +6,9 @@ use App\Enums\JenisPermohonanEnum;
 use App\Enums\StatusPermohonanEnum;
 use App\Filters\PermohonanLayananFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\PermohonanLayanan\JadwalkanPemasanganRequest;
-use App\Http\Requests\PermohonanLayanan\JadwalkanSurveyRequest;
 use App\Http\Requests\PermohonanLayanan\TambahPermohonanRequest;
 use App\Http\Requests\PermohonanLayanan\VerifikasiPermohonanRequest;
+use App\Http\Requests\PermohonanLayanan\JadwalkanKerjaRequest;
 use App\Models\LayananInternet;
 use App\Models\PermohonanLayanan;
 use App\Repositories\Contracts\PermohonanLayananRepositoryInterface;
@@ -39,7 +38,7 @@ class PermohonanLayananController extends Controller
 
         $permohonan = $this->permohonanLayananRepository->find(
             $permohonan->id,
-            ['pelanggan', 'paketInternet', 'riwayatStatus', 'jadwalSurvey', 'jadwalPemasangan']
+            ['pelanggan', 'paketInternet', 'riwayatStatus', 'jadwalKerja']
         );
 
         return response()->json(['data' => $permohonan]);
