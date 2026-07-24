@@ -46,15 +46,18 @@ class AuthPelangganController extends Controller
     }
 
     /**
-     * Login normal setelah pelanggan pernah membuat password.
+     * Login normal. Menerima baik pelanggan yang sudah pernah membuat
+     * password sendiri, maupun yang masih pakai password default
+     * (= nomor_pelanggan, di-set otomatis lewat model event Pelanggan::booted()).
+     * Validasi cukup lewat Hash::check() — kolom password_sudah_dibuat
+     * TIDAK dipakai sebagai filter di sini, hanya untuk menentukan apakah
+     * popup "ganti password" perlu ditampilkan di dashboard.
      */
     public function login(LoginPelangganRequest $request)
     {
         $data = $request->validated();
 
-        $pelanggan = Pelanggan::where('nomor_pelanggan', $data['nomor_pelanggan'])
-            ->where('password_sudah_dibuat', true)
-            ->first();
+        $pelanggan = Pelanggan::where('nomor_pelanggan', $data['nomor_pelanggan'])->first();
 
         if (! $pelanggan || ! Hash::check($data['password'], $pelanggan->password)) {
             throw ValidationException::withMessages([
@@ -102,6 +105,19 @@ class AuthPelangganController extends Controller
 
         return response()->json([
             'message' => 'Berhasil logout.',
+        ]);
+    }
+
+    /**
+     * Data pelanggan yang sedang login. Dipakai dashboard untuk cek
+     * password_sudah_dibuat dari sumber data yang benar (tabel pelanggan),
+     * bukan dari response login. Daftarkan route ini dengan middleware
+     * auth:sanctum, misal: Route::get('/pelanggan/me', [..., 'me']).
+     */
+    public function me(Request $request)
+    {
+        return response()->json([
+            'data' => $request->user(),
         ]);
     }
 }

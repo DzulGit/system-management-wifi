@@ -34,6 +34,13 @@ class Pelanggan extends Authenticatable
         'password' => 'hashed',
     ];
 
+    // Catatan: password default (= nomor_pelanggan) TIDAK di-set di sini,
+    // karena saat Pelanggan::create() dipanggil dari PendaftaranService,
+    // nomor_pelanggan belum ada (masih null). nomor_pelanggan baru
+    // digenerate belakangan di AktivasiAkunPelangganService, saat teknisi
+    // menyelesaikan pemasangan — password default juga di-set di titik
+    // yang sama itu, supaya keduanya selalu konsisten.
+
     public function permohonanLayanan(): HasMany
     {
         return $this->hasMany(PermohonanLayanan::class, 'pelanggan_id');
